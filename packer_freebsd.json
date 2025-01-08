@@ -1,0 +1,61 @@
+{
+  "variables": {
+    "vpc_region": "us-east-1",
+    "ssh_username": "ec2-user"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "name": "freebsd-12.3-mbedtls",
+      "vpc_id":  "vpc-d28c0ca9",
+      "subnet_id": "subnet-a0d573af ",
+      "region": "{{user `vpc_region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "image-id": "ami-0ffeb62fb62c3e3df",
+          "product-code": "ejmg4fgac56dgb0xac6m4fpis"
+        },
+        "owners": ["aws-marketplace"],
+        "most_recent": true
+      },
+      "instance_type": "t3.medium",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ami_name": "jenkins-freebsd-amd64-{{isotime \"2006-01-02-1504\"}}",
+      "ami_regions": ["eu-central-1"],
+      "ami_users": [
+        "987685672616"
+      ],
+      "snapshot_users": [
+        "987685672616"
+      ],
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "gp2",
+          "volume_size": "30",
+          "delete_on_termination": true
+        }
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [ "sleep 60" ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "chmod +x {{.Path}}; /bin/sh  {{.Path}}",
+      "inline": [
+        "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDUkTXHpvPd6doR4vBDEY2t7D0PqSvZEv/D6mavMhztZHkf3TupVS2hTtiZdMwccFpP2RlCnQa7njV02Dx0JEcQwyklIOaSDqFx6LqVDEw0UidoNYrMDdqFOjQsGHThZ09DogPvJ3DUqdYOiTq3vI4OaQzFet+x/JJzJo/iXmNHf8vONCjSiqLIUWw8cgImvvFnVJPy1Rh6x6y6+CfAkDsG4HraDQkzcZzZE4wLs5Fddmdyw5dk8UHH2UH6q/yN9tT3Z36BjumStytYFAcVjiZrkk7da+N5tmjpg/7tbJrQVB9b5sNEjFjyg6zCsc8wktLVk472MuIuHiWSYGDWN4Ar4Pmd24pMgraQA513zR1PChTAeI1VKTvVb9nGUt8rWIJpzkSZiXC2rhoU2STfY+3LsGjnIhWc5OQHs//VGxoy2etKbd1y6/+cO+rbgmk5rQO4KXFCRwj6AWZqyg/BCtSr398YmK3xYjCM8T2cJ04gb3I376pB/RbTvGBwvjcTpGUhWrMCt+V8f61NKVHlH/Of/Dv60IpE68iDv/7zmjXJlmZCvnQkDz9I89eM/RRGkcy+JWZvyAkD/Su2eG1/1dPA48jrVoCB5+f7W8/2iO1jnqpjtggKkFmW1eSo5D5wdLnZTuwVBZQmx9fkZqPt+3796hCwM9lWfVkjsprPVQRqxw== tf-staging-key' > /home/ec2-user/.ssh/authorized_keys",
+        "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCSF9HT6oMDD+7ztIlQmUtCz8qcfS+5MUEnABudsKAFW2ih7XyyLD5xXYZIeMvQLo65Mfzi5DGKBs85Kaw7kLCiNkaU4a8OzjipUfjM0QyHbMo5wjChBhMxqIyx9NK8lpcBPeJquUns07sXs+NRxQ/yc9QQ1kLf61vWPim+R+PW2f0aL+GGTYlZq/v4Ik1GHahSM/5g51skGOsUeh1w4qhlNvE3VQFGQT4rqlnzQDmmhdIjfEJhp574ldwOOALm50OWa62auVPAGwcDujqf/GoX/HMugxVaKryDyrTu+5+lMPUbizf8Lhu4UuBfCPeK0K/gbhdn5M4d4mc0Qd4oaRf5' >> /home/ec2-user/.ssh/authorized_keys",
+        "chmod 600 /home/ec2-user/.ssh/authorized_keys"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "freebsd.sh",
+      "execute_command": "{{.Vars}} su root -c '{{.Path}}'"
+    }
+  ]
+}

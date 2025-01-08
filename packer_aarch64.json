@@ -1,0 +1,53 @@
+{
+  "variables": {
+    "vpc_region": "us-east-1",
+    "ssh_username": "ubuntu"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "name": "ubuntu-20.04-mbedtls",
+      "vpc_id":  "vpc-d28c0ca9",
+      "subnet_id": "subnet-a0d573af",
+      "region": "{{user `vpc_region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-focal-20.04-arm64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      },
+      "instance_type": "t4g.large",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ami_name": "jenkins-aarch64-{{isotime \"2006-01-02-1504\"}}",
+      "ami_users": [
+        "987685672616"
+      ],
+      "ami_regions": ["eu-central-1" ],
+      "snapshot_users": [
+	"987685672616"
+      ],
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "gp3",
+          "volume_size": "50",
+          "delete_on_termination": true
+        }
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [ "sleep 60" ]
+    },
+    {
+      "type": "shell",
+      "script": "ubuntu.sh",
+      "execute_command": "{{.Vars}} sudo -E sh -eux '{{.Path}}'"
+    }
+  ]
+}
